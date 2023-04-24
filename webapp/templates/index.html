@@ -1,2 +1,60 @@
 <!DOCTYPE html>
 <h1>HELLO MADELINE</h1>
+
+{% load static %}
+
+<!-- <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css'}">
+<script src="{% static 'jsTree/dist/jstree.min.js'}"></script> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>File System Menu</title>
+  <!-- Add JStree CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+</head>
+<body>
+  <div id="file-system-menu">
+    <!-- JStree will populate this div with the file system menu -->
+  </div>
+
+  <!-- Add Jquery library -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Add JStree JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+  <script>
+    console.log("{{ files|escapejs }}")
+    $(function () {
+      var files = JSON.parse('{{ files|escapejs }}');
+      $('#file-system-menu').jstree({
+        'core' : {
+          'data' : files,
+          'themes': {
+            'icons': false
+          }
+        },
+        'plugins': ['search', 'wholerow', 'types'],
+        'types': {
+            'default': {
+                'icon': 'fas fa-folder'
+            },
+            'file': {
+                'icon': 'far fa-file'
+            }
+        }
+
+      }).on('changed.jstree', function (e, data) {
+        var node = data.instance.get_node(data.selected[0]);
+        if (node.type === 'file') {
+          window.open(node.id);
+        }else{
+            data.instance.toggle_node(node);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

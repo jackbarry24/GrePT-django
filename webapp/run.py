@@ -3,6 +3,7 @@ import os
 import django
 import sys
 from django.conf import settings
+from webapp.secret import DJANGO_SECRET_KEY
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -28,7 +29,12 @@ def boot_django():
         ROOT_URLCONF='webapp.urls',
         BASE_DIR=BASE_DIR,
         DEBUG=True,
+        SECRET_KEY=DJANGO_SECRET_KEY,
         ALLOWED_HOSTS=['127.0.0.1'],
+        STATICFILES_DIRS=[os.path.join(BASE_DIR, 'static')],
+        TEMPLATE_CONTEXT_PROCESSORS = [
+            'django.core.context_processors.request',
+        ],
         TEMPLATES=TEMPLATES,
         DATABASES = {
             'default': {
@@ -42,6 +48,7 @@ def boot_django():
             'django.contrib.contenttypes',
             'django.contrib.sessions',
             'django.contrib.messages',
+            'django.core.serializers.json',
             'webapp',
         ),
         TIME_ZONE = 'UTC',
@@ -55,6 +62,8 @@ def main():
     boot_django()
     if len(sys.argv) > 1 and sys.argv[1] == 'migrate':
         call_command('migrate')
+    elif len(sys.argv) > 1 and sys.argv[1] == 'shell':
+        call_command('shell')
     else:
         call_command('runserver')
 
