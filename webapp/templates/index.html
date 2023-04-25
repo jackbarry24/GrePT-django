@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<h1>HELLO MADELINE</h1>
+<h1>GrePT</h1>
 
 {% load static %}
 
@@ -12,7 +12,9 @@
   <meta charset="UTF-8">
   <title>File System Menu</title>
   <!-- Add JStree CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" /> -->
+  <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'index.css' %}" />
 </head>
 <body>
   <div id="file-system-menu">
@@ -22,7 +24,8 @@
   <!-- Add Jquery library -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Add JStree JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script> -->
+  <script src="{% static 'jsTree/dist/jstree.min.js' %}"></script>
 
   <script>
     console.log("{{ files|escapejs }}")
@@ -31,17 +34,15 @@
       $('#file-system-menu').jstree({
         'core' : {
           'data' : files,
-          'themes': {
-            'icons': false
-          }
+
         },
         'plugins': ['search', 'wholerow', 'types'],
         'types': {
             'default': {
-                'icon': 'fas fa-folder'
+                'icon': 'jstree-folder'
             },
             'file': {
-                'icon': 'far fa-file'
+                'icon': 'jstree-file'
             }
         }
 
