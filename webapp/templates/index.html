@@ -10,16 +10,26 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>File System Menu</title>
+  <title>GrePT</title>
   <!-- Add JStree CSS -->
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" /> -->
   <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css' %}" />
   <link rel="stylesheet" href="{% static 'index.css' %}" />
 </head>
 <body>
-  <div id="file-system-menu">
-    <!-- JStree will populate this div with the file system menu -->
+  <div id="selected-nodes">
+    <!-- JStree will populate this div with the selected nodes -->
+    <ul id="selected-nodes-list">
+    </ul>
   </div>
+  <div id="file-system-menu">
+    <!-- JStree will populate this div with the file system menu
+    , initialize a list  -->
+    
+    
+  </div>
+
+  
 
   <!-- Add Jquery library -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -28,15 +38,20 @@
   <script src="{% static 'jsTree/dist/jstree.min.js' %}"></script>
 
   <script>
-    console.log("{{ files|escapejs }}")
     $(function () {
       var files = JSON.parse('{{ files|escapejs }}');
       $('#file-system-menu').jstree({
         'core' : {
           'data' : files,
+          'themes': {
+            'responsive': true,
+            'ellipsis': true,
+            'stripes': true,
+            'dots': true,
+          }
 
         },
-        'plugins': ['search', 'wholerow', 'types'],
+        'plugins': ['checkbox', 'wholerow', 'types'],
         'types': {
             'default': {
                 'icon': 'jstree-folder'
@@ -44,15 +59,51 @@
             'file': {
                 'icon': 'jstree-file'
             }
+        },
+        'checkbox': {
+          'three_state': false,
         }
 
-      }).on('changed.jstree', function (e, data) {
+      });
+      
+      //handle when a node is expanded
+      $('#file-system-menu').on('open_node.jstree', function (e, data) {
+        console.log("NODE OPENED MF")
+
+        if (!data.selected || data.selected.length === 0) {
+          return;
+        }
         var node = data.instance.get_node(data.selected[0]);
         if (node.type === 'file') {
           window.open(node.id);
         }else{
             data.instance.toggle_node(node);
         }
+      });
+
+      //get list of checked nodes when the user clicks on a checkbox
+      $('#file-system-menu').on('changed.jstree', function (e, data) {
+        var i, j, selectedPaths = [];
+        for(i = 0, j = data.selected.length; i < j; i++) {
+          selectedPaths.push(data.instance.get_node(data.selected[i]).id);
+        }
+        //for each item in selectedPaths add a li to the ul "selected-nodes-list"
+        $('#selected-nodes-list').empty();
+        $('#selected-nodes-list').append('Selected Files:');
+        for (i = 0; i < selectedPaths.length; i++) {
+          $('#selected-nodes-list').append('<li>' + selectedPaths[i] + '</li>');
+        }
+        console.log(selectedPaths);
+        //$('#selected-nodes').html('Selected: ' + r.join(', '));
+        $.post({
+          url: '/add_file/',
+          type: 'POST',
+          data: JSON.stringify(selectedPaths),
+          contentType: 'application/json',
+          success: function (data) {
+            console.log(data);
+          }
+        });
       });
     });
   </script>

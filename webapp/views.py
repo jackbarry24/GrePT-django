@@ -1,6 +1,8 @@
-from django.shortcuts import render
 import os
 import json
+from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 #create a json rep of the file system 
 def create_fs_tree(path):
@@ -21,6 +23,17 @@ def index(request):
     files_json = json.dumps(tree)
 
     return render(request, 'index.html', {'files': files_json})
+
+@csrf_exempt
+def add_selected_file(request):
+    if request.method == 'POST':
+        selected_paths = json.loads(request.body)
+        print(selected_paths)
+        return HttpResponse("success")
+    else:
+        return HttpResponse("error")
+        #return JsonResponse({'selected_paths': selected_paths, "status": "success"})
+    
 
 
     

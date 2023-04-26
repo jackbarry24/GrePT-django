@@ -2,5 +2,11 @@
 #file-system-menu {
     width: 33%;
     position: fixed;
-    overflow-y: scroll;
-}
+    top: 60;
+    left: 0;
+    overflow-y: auto;
+  }
+  
+  #selected-nodes {
+    width: 33%;
+  }
