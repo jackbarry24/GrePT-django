@@ -1,12 +1,46 @@
-
 #file-system-menu {
-    width: 33%;
-    position: fixed;
-    top: 60;
-    left: 0;
-    overflow-y: auto;
+    width: calc(33% - 120px);
   }
   
-  #selected-nodes {
-    width: 33%;
-  }
+#selected-nodes {
+/* top: 60px;
+left: 60px; */
+width: calc(33% - 120px);
+}
+
+#clear-selected-files {
+/* position: absolute;
+top: 60px;
+left: 60px; */
+width: calc(33% - 120px);
+/* margin-top: 300px; */
+}
+  
+#chat-container {
+position: absolute;
+top: 60px;
+right: 60px;
+bottom: 60px;
+width: calc(66% - 120px);
+border: 1px solid #ccc;
+border-radius: 5px;
+background-image: linear-gradient(to bottom right, #d6d6d6, #b3b2b2);
+height: calc(100% - 120px);
+}
+
+#sidebar {
+    padding-left: 60px;
+}
+
+/* put message form to bottom of chat container and center it within the container */
+#message-form {
+    position: absolute;
+    bottom: 0;
+    padding: 20px;
+    left: 0;
+    right: 0;
+    margin: auto;
+
+}
+
+

@@ -1,112 +1,129 @@
 <!DOCTYPE html>
-<h1>GrePT</h1>
-
 {% load static %}
 
-<!-- <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css'}">
-<script src="{% static 'jsTree/dist/jstree.min.js'}"></script> -->
-
-<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>GrePT</title>
-  <!-- Add JStree CSS -->
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" /> -->
-  <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css' %}" />
-  <link rel="stylesheet" href="{% static 'index.css' %}" />
-</head>
-<body>
-  <div id="selected-nodes">
-    <!-- JStree will populate this div with the selected nodes -->
-    <ul id="selected-nodes-list">
-    </ul>
-  </div>
-  <div id="file-system-menu">
-    <!-- JStree will populate this div with the file system menu
-    , initialize a list  -->
-    
-    
-  </div>
+  <head>
+    <meta charset="UTF-8">
+    <title>GrePT</title>
+    <link rel="stylesheet" href="{% static 'jsTree/dist/themes/default/style.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'index.css' %}" /> 
+  </head>
+  <body>
+    <div id="sidebar">
+      <h1>GrePT</h1>
+      <div id="selected-nodes">
+        <ul id="selected-nodes-list"></ul>
+      </div>
+      <div>
+        <button id="clear-selected-files">Clear Selected Files</button>
+      </div>
+      <div id="file-system-menu"></div>
+    </div>
+    <div id="chat-container">
+      <div id="chat-window"></div>
 
-  
+      <form id="message-form">
+        <textarea id="message-input" rows="4" cols="60" style="resize: none"></textarea>
+        <button id="message-submit" type="submit">Send</button>
+      </form>
 
-  <!-- Add Jquery library -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- Add JStree JS -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script> -->
-  <script src="{% static 'jsTree/dist/jstree.min.js' %}"></script>
+    </div>
 
-  <script>
-    $(function () {
-      var files = JSON.parse('{{ files|escapejs }}');
-      $('#file-system-menu').jstree({
-        'core' : {
-          'data' : files,
-          'themes': {
-            'responsive': true,
-            'ellipsis': true,
-            'stripes': true,
-            'dots': true,
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'jsTree/dist/jstree.min.js' %}"></script>
+
+    <script>
+      $(function () {
+        var files = JSON.parse('{{ files|escapejs }}');
+        $('#file-system-menu').jstree({
+          'core' : {
+            'data' : files,
+            'themes': {
+              'responsive': true,
+              'ellipsis': true,
+              'stripes': true,
+              'dots': true,
+            }
+
+          },
+          'plugins': ['checkbox', 'wholerow', 'types'],
+          'types': {
+              'default': {
+                  'icon': 'jstree-folder'
+              },
+              'file': {
+                  'icon': 'jstree-file'
+              }
+          },
+          'checkbox': {
+            'three_state': false,
           }
 
-        },
-        'plugins': ['checkbox', 'wholerow', 'types'],
-        'types': {
-            'default': {
-                'icon': 'jstree-folder'
-            },
-            'file': {
-                'icon': 'jstree-file'
-            }
-        },
-        'checkbox': {
-          'three_state': false,
-        }
+        });
+        
+        //handle when a node is expanded
+        $('#file-system-menu').on('open_node.jstree', function (e, data) {
+          console.log("NODE OPENED MF")
 
-      });
-      
-      //handle when a node is expanded
-      $('#file-system-menu').on('open_node.jstree', function (e, data) {
-        console.log("NODE OPENED MF")
-
-        if (!data.selected || data.selected.length === 0) {
-          return;
-        }
-        var node = data.instance.get_node(data.selected[0]);
-        if (node.type === 'file') {
-          window.open(node.id);
-        }else{
-            data.instance.toggle_node(node);
-        }
-      });
-
-      //get list of checked nodes when the user clicks on a checkbox
-      $('#file-system-menu').on('changed.jstree', function (e, data) {
-        var i, j, selectedPaths = [];
-        for(i = 0, j = data.selected.length; i < j; i++) {
-          selectedPaths.push(data.instance.get_node(data.selected[i]).id);
-        }
-        //for each item in selectedPaths add a li to the ul "selected-nodes-list"
-        $('#selected-nodes-list').empty();
-        $('#selected-nodes-list').append('Selected Files:');
-        for (i = 0; i < selectedPaths.length; i++) {
-          $('#selected-nodes-list').append('<li>' + selectedPaths[i] + '</li>');
-        }
-        console.log(selectedPaths);
-        //$('#selected-nodes').html('Selected: ' + r.join(', '));
-        $.post({
-          url: '/add_file/',
-          type: 'POST',
-          data: JSON.stringify(selectedPaths),
-          contentType: 'application/json',
-          success: function (data) {
-            console.log(data);
+          if (!data.selected || data.selected.length === 0) {
+            return;
+          }
+          var node = data.instance.get_node(data.selected[0]);
+          if (node.type === 'file') {
+            window.open(node.id);
+          }else{
+              data.instance.toggle_node(node);
           }
         });
+
+        $('#clear-selected-files').on('click', function () {
+          $('#selected-nodes-list').empty();
+          $('#file-system-menu').jstree(true).deselect_all();
+        });
+
+        //get list of checked nodes when the user clicks on a checkbox
+        $('#file-system-menu').on('changed.jstree', function (e, data) {
+          var i, j, selectedPaths = [];
+          for(i = 0, j = data.selected.length; i < j; i++) {
+            selectedPaths.push(data.instance.get_node(data.selected[i]).id);
+          }
+          //for each item in selectedPaths add a li to the ul "selected-nodes-list"
+          $('#selected-nodes-list').empty();
+          $('#selected-nodes-list').append('Selected Files:');
+          for (i = 0; i < selectedPaths.length; i++) {
+            $('#selected-nodes-list').append('<li>' + selectedPaths[i] + '</li>');
+          }
+          console.log(selectedPaths);
+          //$('#selected-nodes').html('Selected: ' + r.join(', '));
+          $.post({
+            url: '/add_file/',
+            type: 'POST',
+            data: JSON.stringify(selectedPaths),
+            contentType: 'application/json',
+            success: function (data) {
+              console.log(data);
+            }
+          });
+        });
+
+        //handle when submit is clicked
+        $('#message-form').on('submit', function(e) {
+            e.preventDefault();
+            var message = $('#message-input').val();
+            console.log(message);
+            $.post({
+              url: '/new_message/',
+              type: 'POST',
+              data: JSON.stringify(message),
+              contentType: 'application/json',
+              success: function (data) {
+                console.log(data);
+              }
+            });
+            $('#message-input').val('');
+          });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
 

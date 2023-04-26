@@ -33,6 +33,14 @@ def add_selected_file(request):
     else:
         return HttpResponse("error")
         #return JsonResponse({'selected_paths': selected_paths, "status": "success"})
+
+def new_message(request):
+    if request.method == 'POST':
+        message = json.loads(request.body)
+        print(message)
+        return HttpResponse("success")
+    else:
+        return HttpResponse("error")
     
 
 
